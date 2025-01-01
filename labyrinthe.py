@@ -79,15 +79,17 @@ class Labyrinthe:
     def canvas(self):
         line_start = randint((self.q) / 2) + round(self.q / 2)
         line_arrive = randint(self.q / 2)
+        lw = 4
 
+        # interior borders
         for i in range(self.p - 1):
             for j in range(self.q):
                 if not self.tab[i][j].E and self.valid_cells[i, j] and self.valid_cells[i + 1, j]:
-                    plt.plot([i + 1, i + 1], [j, j + 1], 'b')
+                    plt.plot([i + 1, i + 1], [j, j + 1], 'b', linewidth=lw)
         for j in range(self.q - 1):
             for i in range(self.p):
                 if not self.tab[i][j].N and self.valid_cells[i, j] and self.valid_cells[i, j + 1]:
-                    plt.plot([i, i + 1], [j + 1, j + 1], 'b')
+                    plt.plot([i, i + 1], [j + 1, j + 1], 'b', linewidth=lw)
 
         # Parcours chaque cellule
         for i in range(self.p):
@@ -99,24 +101,24 @@ class Labyrinthe:
                 # Ouest (gauche)
                 if i == 0 or not self.valid_cells[i - 1, j]:
                     if j == line_start:
-                        plt.plot(i - 0.5, j + 0.5, marker='o', color='green', markersize=9, label='Départ')
+                        plt.plot(i - 0.5, j + 0.5, marker='o', color='green', markersize=9, label='Départ', solid_capstyle="round")
                     else:
-                        plt.plot([i, i], [j, j + 1], 'b')  # Mur gauche
+                        plt.plot([i, i], [j, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur gauche
 
                 # Est (droite)
                 if i == self.p - 1 or not self.valid_cells[i + 1, j]:
                     if j == line_arrive:
-                        plt.plot(i + 1.5, j + 0.5, marker='*', color='red', markersize=9, label='Arrivée')
+                        plt.plot(i + 1.5, j + 0.5, marker='*', color='red', markersize=9, label='Arrivée', solid_capstyle="round")
                     else:
-                        plt.plot([i + 1, i + 1], [j, j + 1], 'b')  # Mur droit
+                        plt.plot([i + 1, i + 1], [j, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur droit
 
                 # Sud (bas)
                 if j == 0 or not self.valid_cells[i, j - 1]:
-                    plt.plot([i, i + 1], [j, j], 'b')  # Mur bas
+                    plt.plot([i, i + 1], [j, j], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur bas
 
                 # Nord (haut)
                 if j == self.q - 1 or not self.valid_cells[i, j + 1]:
-                    plt.plot([i, i + 1], [j + 1, j + 1], 'b')  # Mur haut
+                    plt.plot([i, i + 1], [j + 1, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur haut
 
         plt.axis('off')
 
@@ -207,10 +209,10 @@ if __name__ == '__main__':
                9: {'lignes': 60, 'colonnes': 55}
                }
 
-    nombre_labyrinthes = 12
-    difficulte = 9
+    nombre_labyrinthes = 24
+    difficulte = 3
     forme = "rectangle"
-    #forme = "cercle"
+    forme = "cercle"
 
     niveau = niveaux[difficulte]
 
