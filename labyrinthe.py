@@ -4,111 +4,124 @@ from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 
 
-class Pile:
+class Stack:
     def __init__(self):
-        self.lst = []
+        """Initialize an empty stack."""
 
-    def empty(self):
-        return self.lst == []
+        self.items = []
 
-    def push(self, x):
-        self.lst.append(x)
+    def is_empty(self):
+        """Check if the stack is empty."""
+
+        return self.items == []
+
+    def push(self, item):
+        """Push an item onto the stack."""
+
+        self.items.append(item)
 
     def pop(self):
-        if self.empty():
-            raise ValueError("pile vide")
-        return self.lst.pop()
+        """Remove and return the top item from the stack."""
+        if self.is_empty():
+
+            raise ValueError("Stack is empty")
+
+        return self.items.pop()
 
 
-class Case:
+class MazeCell:
+    """Represents a cell in the maze with walls in four directions and a visited status."""
     def __init__(self):
         self.N = False
         self.W = False
         self.S = False
         self.E = False
-        self.etat = False
+        self.visited = False
 
 
-def explorer(laby):
-    pile = Pile()
-    pile.push((0, laby.q - 1))
-    laby.tab[0][laby.q - 1].etat = False
+def explore(maze):
+    """Explore the maze from the start to the end, marking visited cells."""
+    stack = Stack()
+    stack.push((0, maze.columns - 1))
+    maze.grid[0][maze.columns - 1].visited = False
     while True:
-        i, j = pile.pop()
-        if i == laby.p - 1 and j == 0:
+        i, j = stack.pop()
+        if i == maze.rows - 1 and j == 0:
             break
-        if j > 0 and laby.tab[i][j].S and laby.tab[i][j - 1].etat:
-            pile.push((i, j))
-            pile.push((i, j - 1))
-            laby.tab[i][j - 1].etat = False
-        elif i < laby.p - 1 and laby.tab[i][j].E and laby.tab[i + 1][j].etat:
-            pile.push((i, j))
-            pile.push((i + 1, j))
-            laby.tab[i + 1][j].etat = False
-        elif j < laby.q - 1 and laby.tab[i][j].N and laby.tab[i][j + 1].etat:
-            pile.push((i, j))
-            pile.push((i, j + 1))
-            laby.tab[i][j + 1].etat = False
-        elif i > 0 and laby.tab[i][j].W and laby.tab[i - 1][j].etat:
-            pile.push((i, j))
-            pile.push((i - 1, j))
-            laby.tab[i - 1][j].etat = False
-    return pile.lst
+        if j > 0 and maze.grid[i][j].S and maze.grid[i][j - 1].visited:
+            stack.push((i, j))
+            stack.push((i, j - 1))
+            maze.grid[i][j - 1].visited = False
+        elif i < maze.rows - 1 and maze.grid[i][j].E and maze.grid[i + 1][j].visited:
+            stack.push((i, j))
+            stack.push((i + 1, j))
+            maze.grid[i + 1][j].visited = False
+        elif j < maze.q - 1 and maze.grid[i][j].N and maze.grid[i][j + 1].visited:
+            stack.push((i, j))
+            stack.push((i, j + 1))
+            maze.grid[i][j + 1].visited = False
+        elif i > 0 and maze.grid[i][j].W and maze.grid[i - 1][j].visited:
+            stack.push((i, j))
+            stack.push((i - 1, j))
+            maze.grid[i - 1][j].visited = False
+    return stack.items
 
 
-class Labyrinthe:
-    def __init__(self, p, q, forme="rectangle"):
-        self.p = p
-        self.q = q
-        self.tab = [[Case() for j in range(q)] for i in range(p)]
-        self.forme = forme
+class Maze:
+    """Represents a maze with cells, supporting various shapes."""
+    def __init__(self, rows, columns, shape="rectangle"):
+
+        self.rows = rows
+        self.columns = columns
+        self.grid = [[MazeCell() for j in range(columns)] for i in range(rows)]
+        self.shape = shape
         self.valid_cells = self._generate_valid_cells()
 
     def _generate_valid_cells(self):
-        """Génère une matrice indiquant si chaque cellule est valide en fonction de la forme."""
-        valid = np.ones((self.p, self.q), dtype=bool)
-        if self.forme == "cercle":
-            cx, cy = self.p // 2, self.q // 2
-            rayon = min(self.p, self.q) // 2
-            for i in range(self.p):
-                for j in range(self.q):
-                    if (i - cx) ** 2 + (j - cy) ** 2 > rayon ** 2:
+        """Generate a matrix indicating valid cells based on the labyrinth shape."""
+        valid = np.ones((self.rows, self.columns), dtype=bool)
+        if self.shape == "circle":
+            cx, cy = self.rows // 2, self.columns // 2
+            radius = min(self.rows, self.columns) // 2
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    if (i - cx) ** 2 + (j - cy) ** 2 > radius ** 2:
                         valid[i, j] = False
         return valid
 
     def canvas(self):
-        line_start = randint((self.q) / 2) + round(self.q / 2)
-        line_arrive = randint(self.q / 2)
+        start_line = randint((self.columns) / 2) + round(self.columns / 2)
+        end_line = randint(self.columns / 2)
         lw = 4
 
         # interior borders
-        for i in range(self.p - 1):
-            for j in range(self.q):
-                if not self.tab[i][j].E and self.valid_cells[i, j] and self.valid_cells[i + 1, j]:
+        for i in range(self.rows - 1):
+            for j in range(self.columns):
+                if not self.grid[i][j].E and self.valid_cells[i, j] and self.valid_cells[i + 1, j]:
                     plt.plot([i + 1, i + 1], [j, j + 1], 'b', linewidth=lw)
-        for j in range(self.q - 1):
-            for i in range(self.p):
-                if not self.tab[i][j].N and self.valid_cells[i, j] and self.valid_cells[i, j + 1]:
+        for j in range(self.columns - 1):
+            for i in range(self.rows):
+                if not self.grid[i][j].N and self.valid_cells[i, j] and self.valid_cells[i, j + 1]:
                     plt.plot([i, i + 1], [j + 1, j + 1], 'b', linewidth=lw)
 
         # Parcours chaque cellule
-        for i in range(self.p):
-            for j in range(self.q):
+        for i in range(self.rows):
+            for j in range(self.columns):
                 if not self.valid_cells[i, j]:
                     continue  # Ignore les cellules non valides
 
                 # Vérifie les bordures et dessine les murs manquants
                 # Ouest (gauche)
                 if i == 0 or not self.valid_cells[i - 1, j]:
-                    if j == line_start:
-                        plt.plot(i - 0.5, j + 0.5, marker='o', color='green', markersize=9, label='Départ', solid_capstyle="round")
+                    if j == start_line:
+                        plt.plot(i - 0.5, j + 0.5, marker='o', color='green', markersize=9, label='Start', solid_capstyle="round")
                     else:
                         plt.plot([i, i], [j, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur gauche
 
                 # Est (droite)
-                if i == self.p - 1 or not self.valid_cells[i + 1, j]:
-                    if j == line_arrive:
-                        plt.plot(i + 1.5, j + 0.5, marker='*', color='red', markersize=9, label='Arrivée', solid_capstyle="round")
+                if i == self.columns - 1 or not self.valid_cells[i + 1, j]:
+                    if j == end_line:
+                        plt.plot(i + 1.5, j + 0.5, marker='*', color='red', markersize=9, label='End', solid_capstyle="round")
                     else:
                         plt.plot([i + 1, i + 1], [j, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur droit
 
@@ -117,18 +130,18 @@ class Labyrinthe:
                     plt.plot([i, i + 1], [j, j], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur bas
 
                 # Nord (haut)
-                if j == self.q - 1 or not self.valid_cells[i, j + 1]:
+                if j == self.columns - 1 or not self.valid_cells[i, j + 1]:
                     plt.plot([i, i + 1], [j + 1, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur haut
 
         plt.axis('off')
 
-    def solution(self):
-        sol = explorer(self)
+    def solution_path(self):
+        path = explore(self)
         X, Y = [], []
-        for (i, j) in sol:
+        for (i, j) in path:
             X.append(i + .5)
             Y.append(j + .5)
-        X.append(self.p - .5)
+        X.append(self.rows - .5)
         Y.append(.5)
         plt.plot(X, Y, 'r', linewidth=2)
 
@@ -137,86 +150,101 @@ class Labyrinthe:
         plt.show()
 
 
-def creation(p, q, forme="rectangle"):
-    laby = Labyrinthe(p, q, forme)
-    pile = Pile()
+def creation(p, q, fig="rectangle"):
+    """
+    Generate a maze of size p x q and shape `fig`.
+
+    This function initializes a maze and generates valid paths within it.
+    It ensures that the maze follows the specified shape and that valid paths
+    connect all cells according to rules of the maze generation algorithm.
+
+    Parameters:
+        p (int): Number of rows in the maze.
+        q (int): Number of columns in the maze.
+        fig (str): Shape of the maze, either "rectangle" or "circle".
+
+    Returns:
+        Maze: A generated maze object with proper walls set up.
+    """
+    maze = Maze(p, q, fig)
+    pile = Stack()
     while True:
         i, j = randint(p), randint(q)
-        if laby.valid_cells[i, j]:
+        if maze.valid_cells[i, j]:
             break
     pile.push((i, j))
-    laby.tab[i][j].etat = True
-    while not pile.empty():
+    maze.grid[i][j].visited = True
+    while not pile.is_empty():
         i, j = pile.pop()
         v = []
-        if j < q - 1 and laby.valid_cells[i, j + 1] and not laby.tab[i][j + 1].etat:
+        if j < q - 1 and maze.valid_cells[i, j + 1] and not maze.grid[i][j + 1].visited:
             v.append('N')
-        if i > 0 and laby.valid_cells[i - 1, j] and not laby.tab[i - 1][j].etat:
+        if i > 0 and maze.valid_cells[i - 1, j] and not maze.grid[i - 1][j].visited:
             v.append('W')
-        if j > 0 and laby.valid_cells[i, j - 1] and not laby.tab[i][j - 1].etat:
+        if j > 0 and maze.valid_cells[i, j - 1] and not maze.grid[i][j - 1].visited:
             v.append('S')
-        if i < p - 1 and laby.valid_cells[i + 1, j] and not laby.tab[i + 1][j].etat:
+        if i < p - 1 and maze.valid_cells[i + 1, j] and not maze.grid[i + 1][j].visited:
             v.append('E')
         if len(v) > 1:
             pile.push((i, j))
         if len(v) > 0:
-            c = v[randint(len(v))]
-            if c == 'N':
-                laby.tab[i][j].N = True
-                laby.tab[i][j + 1].S = True
-                laby.tab[i][j + 1].etat = True
+            direction = v[randint(len(v))]
+
+            if direction == 'N':
+                maze.grid[i][j].N = True
+                maze.grid[i][j + 1].S = True
+                maze.grid[i][j + 1].visited = True
                 pile.push((i, j + 1))
-            elif c == 'W':
-                laby.tab[i][j].W = True
-                laby.tab[i - 1][j].E = True
-                laby.tab[i - 1][j].etat = True
+            elif direction == 'W':
+                maze.grid[i][j].W = True
+                maze.grid[i - 1][j].E = True
+                maze.grid[i - 1][j].visited = True
                 pile.push((i - 1, j))
-            elif c == 'S':
-                laby.tab[i][j].S = True
-                laby.tab[i][j - 1].N = True
-                laby.tab[i][j - 1].etat = True
+            elif direction == 'S':
+                maze.grid[i][j].S = True
+                maze.grid[i][j - 1].N = True
+                maze.grid[i][j - 1].visited = True
                 pile.push((i, j - 1))
             else:
-                laby.tab[i][j].E = True
-                laby.tab[i + 1][j].W = True
-                laby.tab[i + 1][j].etat = True
+                maze.grid[i][j].E = True
+                maze.grid[i + 1][j].W = True
+                maze.grid[i + 1][j].visited = True
                 pile.push((i + 1, j))
-    return laby
+    return maze
 
 
-def to_pdf(filename, niveau, n, forme, difficulte):
-    p = niveau["lignes"]
-    q = niveau["colonnes"]
-    """Génère et sauvegarde `n` labyrinthes de dimensions `p` x `q` dans un fichier PDF."""
+def to_pdf(filename, level, n, shape, difficulty):
+    p = level["rows"]
+    q = level["columns"]
+    """Generate and save `n` mazes of shapes `p` x `q` into a PDF file."""
     with PdfPages(filename) as pdf:
         for k in range(n):
-            laby = creation(p, q, forme)
+            laby = creation(p, q, shape)
             plt.figure(figsize=(8, 8))
             laby.canvas()
-            plt.title(f"Labyrinthe niveau {difficulte}")
-            pdf.savefig()  # Sauvegarde la figure dans le PDF
-            plt.close()  # Ferme la figure pour libérer la mémoire
+            plt.title(f"Maze level {difficulty}")
+            pdf.savefig()
+            plt.close()
 
 
 if __name__ == '__main__':
-    # Dimensions des labyrinthes
-    niveaux = {1: {'lignes': 10, 'colonnes': 5},
-               2: {'lignes': 15, 'colonnes': 10},
-               3: {'lignes': 20, 'colonnes': 15},
-               4: {'lignes': 25, 'colonnes': 20},
-               5: {'lignes': 30, 'colonnes': 20},
-               6: {'lignes': 40, 'colonnes': 30},
-               9: {'lignes': 60, 'colonnes': 55}
-               }
+    # Shape of mazes
+    levels = {1: {'rows': 10, 'columns': 5},
+              2: {'rows': 15, 'columns': 10},
+              3: {'rows': 20, 'columns': 15},
+              4: {'rows': 25, 'columns': 20},
+              5: {'rows': 30, 'columns': 20},
+              6: {'rows': 40, 'columns': 30},
+              9: {'rows': 60, 'columns': 55}
+              }
 
-    nombre_labyrinthes = 24
-    difficulte = 3
-    forme = "rectangle"
-    forme = "cercle"
+    nbr_mazes = 24
+    difficulty = 3
+    shape = "rectangular"
+    shape = "circle"
 
-    niveau = niveaux[difficulte]
+    niveau = levels[difficulty]
 
-    # Génération et sauvegarde des labyrinthes dans un PDF
-    to_pdf("labyrinthes.pdf", niveau, nombre_labyrinthes, forme, difficulte)
+    to_pdf("mazes.pdf", niveau, nbr_mazes, shape, difficulty)
 
-    print(f"{nombre_labyrinthes} labyrinthes de difficulté {difficulte} en forme de {forme} ont été enregistrés dans le fichier.")
+    print(f"{nbr_mazes} mazes {shape} of difficulty {difficulty} had be saved into file.")
