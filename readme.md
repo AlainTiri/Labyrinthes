@@ -11,7 +11,7 @@ This project implements a **maze generation and visualization tool** in Python. 
 
 - **Maze Generation**:
   - Create mazes of various sizes and difficulty levels.
-  - Supports two shapes: `rectangle` and `circle`.
+  - Supports two shapes: `rectangular` and `circle`.
   
 - **Maze Exploration**:
   - Implements **depth-first search (DFS)** to generate maze paths.
@@ -30,14 +30,14 @@ This project implements a **maze generation and visualization tool** in Python. 
 
 1. **Clone the Repository**:
    ```bash
-   git clone <repository_url>
-   cd <repository_folder>
+   git clone https://github.com/AlainTiri/Labyrinthes
+   cd Labyrinthes
    ```
 
 2. **Install Required Libraries**:
    Make sure to install the required Python libraries. You can use `pip` to install them:
    ```bash
-   pip install numpy matplotlib
+   pip install -r requirements.txt
    ```
 
 ---
@@ -49,20 +49,20 @@ The project provides both a direct script usage and reusable classes for creatin
 ### Generating Mazes
 To create and save mazes to a file, you can run the script:
 ```bash
-python <script_name>.py
+python maze.py
 ```
 
 ### Example Parameters
 You can configure the script by modifying:
-- Number of mazes (`nombre_labyrinthes`)
+- Number of mazes (`nbr_mazes`)
 - Difficulty level (`difficulty`) from 1 to 9.
-- Shape of the maze (`figure`) which can be `"rectangle"` or `"circle"`.
+- Shape of the maze (`figure`) which can be `"rectangular"` or `"circle"`.
 
 Example configuration:
 ```python
 nombre_labyrinthes = 24
 difficulty = 3
-figure = "rectangle"
+figure = "rectangular"
 ```
 
 ### Program Output
@@ -73,10 +73,11 @@ After running the script, the generated mazes will be saved to a PDF:
 
 ### Generating Mazes Programmatically
 You can create and display a maze by using the `creation()` function:
-```python
-from <script_name> import creation
 
-maze = creation(10, 10, "rectangle")  # 10x10 rectangular maze
+```python
+from maze import creation
+
+maze = creation(10, 10, "rectangular")  # 10x10 rectangular maze
 maze.show()
 ```
 
@@ -114,7 +115,7 @@ maze.show()
 ### Generate and Show a Maze
 ```python
 # Import and generate a maze
-from <script_name> import creation
+from maze import creation
 
 maze = creation(15, 10, "rectangle")  # Generate a 15x10 rectangular maze
 maze.show()                           # Display the maze
@@ -122,7 +123,7 @@ maze.show()                           # Display the maze
 
 ### Export Multiple Mazes to PDF
 ```python
-from <script_name> import to_pdf
+from maze import to_pdf
 
 level = {"rows": 20, "columns": 15}       # Define maze dimensions
 to_pdf("mazes.pdf", level, 10, "circle", 3)  # Save 10 circular mazes of difficulty 3
@@ -174,4 +175,4 @@ This project is licensed under the MIT License.
 
 ## Contact
 
-For questions or issues, feel free to contact the author or open a GitHub issue.
+For questions or issues, feel free to contact Alain Tiri or open a GitHub issue.
