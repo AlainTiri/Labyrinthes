@@ -66,9 +66,9 @@ def explore(maze):
             maze.grid[i - 1][j].visited = False
     return stack.items
 
-
 class Maze:
     """Represents a maze with cells, supporting various shapes."""
+
     def __init__(self, rows, columns, shape="rectangle"):
 
         self.rows = rows
@@ -114,24 +114,26 @@ class Maze:
                 # Ouest (gauche)
                 if i == 0 or not self.valid_cells[i - 1, j]:
                     if j == start_line:
-                        plt.plot(i - 0.5, j + 0.5, marker='o', color='green', markersize=9, label='Start', solid_capstyle="round")
+                        plt.plot(i - 0.5, j + 0.5, marker='o', color='green', markersize=9, label='Start',
+                                 solid_capstyle="round")
                     else:
-                        plt.plot([i, i], [j, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur gauche
+                        plt.plot([i, i], [j, j + 1], 'b', linewidth=lw + 1, solid_capstyle="round")  # Mur gauche
 
                 # Est (droite)
-                if i == self.columns - 1 or not self.valid_cells[i + 1, j]:
+                if i == self.rows - 1 or i + 1 >= self.rows or not self.valid_cells[i + 1, j]:
                     if j == end_line:
-                        plt.plot(i + 1.5, j + 0.5, marker='*', color='red', markersize=9, label='End', solid_capstyle="round")
+                        plt.plot(i + 1.5, j + 0.5, marker='*', color='red', markersize=9, label='End',
+                                 solid_capstyle="round")
                     else:
-                        plt.plot([i + 1, i + 1], [j, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur droit
+                        plt.plot([i + 1, i + 1], [j, j + 1], 'b', linewidth=lw + 1, solid_capstyle="round")  # Mur droit
 
                 # Sud (bas)
                 if j == 0 or not self.valid_cells[i, j - 1]:
-                    plt.plot([i, i + 1], [j, j], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur bas
+                    plt.plot([i, i + 1], [j, j], 'b', linewidth=lw + 1, solid_capstyle="round")  # Mur bas
 
                 # Nord (haut)
                 if j == self.columns - 1 or not self.valid_cells[i, j + 1]:
-                    plt.plot([i, i + 1], [j + 1, j + 1], 'b', linewidth=lw+1, solid_capstyle="round")  # Mur haut
+                    plt.plot([i, i + 1], [j + 1, j + 1], 'b', linewidth=lw + 1, solid_capstyle="round")  # Mur haut
 
         plt.axis('off')
 
@@ -214,13 +216,16 @@ def creation(p, q, fig="rectangle"):
 
 
 def to_pdf(filename, level, n, shape, difficulty):
-    p = level["rows"]
-    q = level["columns"]
-    """Generate and save `n` mazes of shapes `p` x `q` into a PDF file."""
+    rows = level["rows"]
+    columns = level["columns"]
+    if shape == "circle":
+        new_dimension = max(rows, columns)
+        rows = columns = new_dimension if new_dimension == 0 else new_dimension + 1
+    """Generate and save `n` mazes of shapes `rows` x `columns` into a PDF file."""
     with PdfPages(filename) as pdf:
         for k in range(n):
-            laby = creation(p, q, shape)
-            plt.figure(figsize=(8, 8))
+            laby = creation(rows, columns, shape)
+            plt.figure(figsize=(rows, columns))
             laby.canvas()
             plt.title(f"Maze level {difficulty}")
             pdf.savefig()
@@ -238,10 +243,10 @@ if __name__ == '__main__':
               9: {'rows': 60, 'columns': 55}
               }
 
-    nbr_mazes = 24
-    difficulty = 3
-    shape = "rectangular"
-    shape = "circle"
+    nbr_mazes = 100
+    difficulty = 1
+    shapes = ["circle", "rectangular"]
+    shape = shapes[1]
 
     niveau = levels[difficulty]
 
