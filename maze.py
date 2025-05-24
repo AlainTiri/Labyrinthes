@@ -227,8 +227,16 @@ def to_pdf(filename, level, n, shape, difficulty):
             laby = creation(rows, columns, shape)
             plt.figure(figsize=(rows, columns))
             laby.canvas()
+
             plt.title(f"Maze level {difficulty}")
-            pdf.savefig()
+
+            # Supprimer les bordures et marges
+            plt.gca().set_aspect('equal')
+            plt.axis('off')  # Retire les axes
+            plt.tight_layout(pad=0)  # Supprime les marges
+
+            # Sauvegarder sans bordure
+            pdf.savefig(bbox_inches='tight', pad_inches=0, facecolor='white')
             plt.close()
 
 
@@ -240,16 +248,19 @@ if __name__ == '__main__':
               4: {'rows': 25, 'columns': 20},
               5: {'rows': 30, 'columns': 20},
               6: {'rows': 40, 'columns': 30},
-              9: {'rows': 60, 'columns': 55}
+              7: {'rows': 50, 'columns': 35},
+              8: {'rows': 60, 'columns': 45},
+              9: {'rows': 70, 'columns': 55},
+              10: {'rows': 90, 'columns': 60}
               }
 
-    nbr_mazes = 100
-    difficulty = 1
-    shapes = ["circle", "rectangular"]
-    shape = shapes[1]
+    nbr_mazes = 4
+    difficulty = 10
+    forms = ["circle", "rectangular"]
+    form = forms[1]
 
-    niveau = levels[difficulty]
+    level = levels[difficulty]
 
-    to_pdf("mazes.pdf", niveau, nbr_mazes, shape, difficulty)
+    to_pdf("mazes.pdf", level, nbr_mazes, form, difficulty)
 
-    print(f"{nbr_mazes} mazes {shape} of difficulty {difficulty} had be saved into file.")
+    print(f"{nbr_mazes} mazes {form} of difficulty {difficulty} had be saved into file.")
